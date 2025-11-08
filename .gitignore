@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# Results - 忽略所有训练结果，保留文件夹结构
+# 使用.gitkeep保留空文件夹结构
+results/**/*
+!results/**/.gitkeep
+
+# 注意：以下文件将被上传到GitHub
+# - data/samsum.zip (3.8MB) - SAMSum数据集压缩包
+# - tokenizer.json (486KB) - BPE分词器，训练时生成的必需文件

@@ -1,0 +1,43 @@
+# 消融实验 - 基线配置（完整模型）
+# 这是对照组，包含所有优化组件
+
+# 实验名称
+experiment_name: "baseline"
+
+# 模型配置
+d_model: 256
+num_heads: 8
+num_encoder_layers: 4
+num_decoder_layers: 4
+d_ff: 1024
+dropout: 0.1
+max_len: 512
+use_positional_encoding: true  # 使用位置编码
+
+# 训练配置
+batch_size: 16
+learning_rate: 3e-4
+num_epochs: 15  # 主实验15轮触发早停，消融实验同样设为15轮
+warmup_steps: 500
+label_smoothing: 0.1
+seed: 42
+device: "auto"  # 自动检测设备
+
+# 梯度累积配置（重要优化）
+gradient_accumulation_steps: 2  # 有效batch_size = 32
+
+# 早停配置
+early_stopping_patience: 5
+early_stopping_min_delta: 0.0
+
+# 数据配置
+dataset_name: "knkarthick/samsum"
+vocab_size: 8000  # 自训练BPE分词器
+tokenizer_path: "tokenizer.json"
+max_src_len: 512
+max_tgt_len: 128
+
+# 其他配置
+save_dir: "results/ablation/baseline"
+log_interval: 50  # 训练日志打印间隔
+max_grad_norm: 1.0  # 梯度裁剪
