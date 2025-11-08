@@ -41,6 +41,8 @@ ENV/
 .AppleDouble
 .LSOverride
 
+.claude/
+
 # Logs
 *.log
 
