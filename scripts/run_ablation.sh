@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # 消融实验运行脚本
 # 依次运行所有消融实验，验证各组件的重要性
 #
@@ -8,9 +6,7 @@
 #   bash scripts/run_ablation.sh baseline     # 只运行指定实验
 #   bash scripts/run_ablation.sh --device mps # 指定设备
 
-echo "=========================================="
 echo "Transformer 消融实验"
-echo "=========================================="
 echo ""
 echo "本脚本将运行以下消融实验："
 echo "  1. baseline                  - 完整模型（对照组）"
@@ -62,9 +58,7 @@ START_TIME=$(date +%s)
 
 # 依次运行实验
 for exp in "${EXPERIMENTS[@]}"; do
-    echo "=========================================="
     echo "开始实验: $exp"
-    echo "=========================================="
     echo "配置文件: configs/ablation/${exp}.yaml"
     echo ""
 
@@ -76,11 +70,11 @@ for exp in "${EXPERIMENTS[@]}"; do
 
     if [ $? -eq 0 ]; then
         echo ""
-        echo "✅ 实验 $exp 完成"
+        echo " 实验 $exp 完成"
         echo ""
     else
         echo ""
-        echo "❌ 实验 $exp 失败"
+        echo " 实验 $exp 失败"
         echo ""
         exit 1
     fi
@@ -92,9 +86,7 @@ DURATION=$((END_TIME - START_TIME))
 HOURS=$((DURATION / 3600))
 MINUTES=$(((DURATION % 3600) / 60))
 
-echo "=========================================="
 echo "所有消融实验完成！"
-echo "=========================================="
 echo "总耗时: ${HOURS}小时${MINUTES}分钟"
 echo ""
 echo "结果保存在: results/ablation/"

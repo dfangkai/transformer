@@ -378,18 +378,6 @@ PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))
 - 监控验证loss，连续5个epoch无改善时停止
 - 避免过拟合，节省训练时间
 
-## 致谢
-
-- 论文: "Attention Is All You Need" (Vaswani et al., 2017)
-- 数据集: SAMSum Corpus
-- 框架: PyTorch
-
-## 代码仓库
-
-**GitHub**: https://github.com/dfangkai/transformer
-
-完整代码、配置文件、训练脚本和详细文档均已开源，欢迎访问、使用和贡献！
-
 ---
 
 **作者**: dongfangkai | **更新**: 2025-11-08

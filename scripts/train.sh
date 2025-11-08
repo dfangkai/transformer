@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Transformer 对话摘要训练脚本
 # 使用方法:
 #   bash scripts/train.sh              # 自动检测设备 (MPS/CUDA/CPU)
@@ -8,9 +6,7 @@
 #   bash scripts/train.sh cpu          # 强制使用 CPU
 #   bash scripts/train.sh --quick      # 快速测试 (10 epochs)
 
-echo "=========================================="
 echo "Transformer 对话摘要训练"
-echo "=========================================="
 echo ""
 
 # 设置项目根目录
@@ -61,9 +57,7 @@ python src/train.py \
     $EPOCHS_ARG
 
 echo ""
-echo "=========================================="
 echo "训练完成！"
-echo "=========================================="
 echo "结果保存在: results/summarization/"
 echo "  - best_model.pt           最佳模型checkpoint"
 echo "  - training_history.json   训练历史数据"

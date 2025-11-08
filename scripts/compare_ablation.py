@@ -18,18 +18,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 def load_experiment_results(exp_name: str):
     """
     加载单个实验的结果
-
-    Args:
-        exp_name: 实验名称
-
-    Returns:
-        包含实验结果的字典，如果文件不存在返回None
     """
     model_path = f"results/ablation/{exp_name}/best_model.pt"
     rouge_path = f"results/ablation/{exp_name}/rouge_scores.json"
 
     if not os.path.exists(model_path):
-        print(f"⚠️  未找到实验结果: {exp_name}")
+        print(f"  未找到实验结果: {exp_name}")
         return None
 
     try:
@@ -56,7 +50,7 @@ def load_experiment_results(exp_name: str):
 
         return result
     except Exception as e:
-        print(f"❌ 加载 {exp_name} 失败: {e}")
+        print(f" 加载 {exp_name} 失败: {e}")
         return None
 
 
@@ -85,7 +79,7 @@ def compare_experiments():
             results.append(result)
 
     if not results:
-        print("❌ 没有找到任何实验结果")
+        print(" 没有找到任何实验结果")
         print("\n请先运行消融实验:")
         print("  bash scripts/run_ablation.sh")
         return
@@ -101,7 +95,7 @@ def compare_experiments():
     df = df.sort_values('val_loss')
 
     # 打印表格
-    print("\n📊 实验结果对比表")
+    print("\n 实验结果对比表")
     print("-" * 120)
     print(f"{'实验名称':<30} {'验证Loss':>10} {'训练Loss':>10} {'ROUGE-1':>9} {'ROUGE-2':>9} {'ROUGE-L':>9} {'Epoch':>7} {'参数量':>12}")
     print("-" * 120)
@@ -121,7 +115,7 @@ def compare_experiments():
     best_idx = df['val_loss'].idxmin()
     best_exp = df.loc[best_idx]
 
-    print(f"\n✅ 最佳配置: {best_exp['description']}")
+    print(f"\n 最佳配置: {best_exp['description']}")
     print(f"   验证Loss: {best_exp['val_loss']:.4f}")
     print(f"   训练Loss: {best_exp['train_loss']:.4f}")
     if not pd.isna(best_exp['rouge1']):
@@ -134,7 +128,7 @@ def compare_experiments():
         baseline = df[df['experiment'] == 'baseline'].iloc[0]
         baseline_loss = baseline['val_loss']
 
-        print(f"\n📈 相对Baseline的性能变化:")
+        print(f"\n 相对Baseline的性能变化:")
         print("-" * 120)
         print(f"{'实验名称':<30} {'验证Loss变化':>15} {'ROUGE-1变化':>15} {'ROUGE-2变化':>15} {'ROUGE-L变化':>15}")
         print("-" * 120)
@@ -199,7 +193,7 @@ def compare_experiments():
 
     save_path = 'results/ablation/comparison_val_loss.png'
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    print(f"✅ 保存验证Loss对比图: {save_path}")
+    print(f" 保存验证Loss对比图: {save_path}")
     plt.close()
 
     # 2. 训练Loss vs 验证Loss散点图
@@ -231,7 +225,7 @@ def compare_experiments():
 
     save_path = 'results/ablation/comparison_train_vs_val.png'
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    print(f"✅ 保存训练vs验证Loss图: {save_path}")
+    print(f" 保存训练vs验证Loss图: {save_path}")
     plt.close()
 
     # 3. 保存CSV结果

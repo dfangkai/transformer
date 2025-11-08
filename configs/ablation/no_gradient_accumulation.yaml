@@ -23,7 +23,7 @@ seed: 42
 device: "auto"  # 自动检测设备
 
 # 梯度累积配置
-gradient_accumulation_steps: 1  # ❌ 不使用梯度累积（baseline是2）
+gradient_accumulation_steps: 1  # 不使用梯度累积（baseline是2）
 
 # 早停配置
 early_stopping_patience: 5

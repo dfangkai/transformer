@@ -24,26 +24,6 @@ class DecoderLayer(nn.Module):
     3. Position-wise Feed-Forward Network
 
     每个子层后都有残差连接和Layer Normalization。
-
-    参数:
-        d_model (int): 模型的嵌入维度
-        num_heads (int): 注意力头的数量
-        d_ff (int): 前馈网络的隐藏层维度
-        dropout (float): dropout概率，默认0.1
-
-    属性:
-        self_attn (MultiHeadAttention): 多头自注意力层（带mask）
-        cross_attn (MultiHeadAttention): 多头交叉注意力层
-        feed_forward (PositionWiseFeedForward): 前馈神经网络
-        sublayer_connections (nn.ModuleList): 三个残差连接层
-
-    示例:
-        >>> decoder_layer = DecoderLayer(d_model=256, num_heads=8, d_ff=1024)
-        >>> x = torch.randn(32, 10, 256)  # [batch, tgt_len, d_model]
-        >>> enc_output = torch.randn(32, 20, 256)  # [batch, src_len, d_model]
-        >>> output = decoder_layer(x, enc_output)
-        >>> output.shape
-        torch.Size([32, 10, 256])
     """
 
     def __init__(
@@ -57,14 +37,6 @@ class DecoderLayer(nn.Module):
     ):
         """
         初始化Decoder层
-
-        Args:
-            d_model: 模型的嵌入维度
-            num_heads: 注意力头的数量
-            d_ff: 前馈网络的隐藏层维度
-            dropout: dropout概率
-            use_residual: 是否使用残差连接
-            use_layernorm: 是否使用LayerNorm
         """
         super(DecoderLayer, self).__init__()
 
@@ -115,16 +87,6 @@ class DecoderLayer(nn.Module):
     ) -> torch.Tensor:
         """
         Decoder层的前向传播
-
-        Args:
-            x: 目标序列的输入，shape: [batch, tgt_len, d_model]
-            encoder_output: Encoder的输出，shape: [batch, src_len, d_model]
-            src_mask: 源序列的mask，shape: [batch, 1, 1, src_len]
-            tgt_mask: 目标序列的mask（包含padding和future mask），
-                     shape: [batch, 1, tgt_len, tgt_len]
-
-        Returns:
-            输出张量，shape: [batch, tgt_len, d_model]
         """
         # 第一个子层：Masked Multi-Head Self-Attention + 残差连接 + LayerNorm
         # SublayerConnection会根据配置自动处理是否使用残差和LayerNorm
@@ -154,37 +116,6 @@ class Decoder(nn.Module):
     2. Positional Encoding
     3. N个DecoderLayer
     4. 最终的Layer Normalization
-
-    参数:
-        vocab_size (int): 词汇表大小
-        d_model (int): 模型的嵌入维度
-        num_heads (int): 注意力头的数量
-        d_ff (int): 前馈网络的隐藏层维度
-        num_layers (int): Decoder层的数量
-        max_len (int): 最大序列长度，默认5000
-        dropout (float): dropout概率，默认0.1
-
-    属性:
-        embedding (nn.Embedding): Token嵌入层
-        pos_encoding (PositionalEncoding): 位置编码层
-        layers (nn.ModuleList): Decoder层列表
-        norm (nn.LayerNorm): 最终的Layer Normalization
-        d_model (int): 模型维度
-        scale (float): 嵌入缩放因子，等于sqrt(d_model)
-
-    示例:
-        >>> decoder = Decoder(
-        ...     vocab_size=10000,
-        ...     d_model=256,
-        ...     num_heads=8,
-        ...     d_ff=1024,
-        ...     num_layers=4
-        ... )
-        >>> tgt = torch.randint(0, 10000, (32, 15))  # [batch, tgt_len]
-        >>> enc_output = torch.randn(32, 20, 256)  # [batch, src_len, d_model]
-        >>> output = decoder(tgt, enc_output)
-        >>> output.shape
-        torch.Size([32, 15, 256])
     """
 
     def __init__(
@@ -202,18 +133,6 @@ class Decoder(nn.Module):
     ):
         """
         初始化Decoder
-
-        Args:
-            vocab_size: 词汇表大小
-            d_model: 模型的嵌入维度
-            num_heads: 注意力头的数量
-            d_ff: 前馈网络的隐藏层维度
-            num_layers: Decoder层的数量
-            max_len: 最大序列长度
-            dropout: dropout概率
-            use_positional_encoding: 是否使用位置编码
-            use_residual: 是否使用残差连接
-            use_layernorm: 是否使用LayerNorm
         """
         super(Decoder, self).__init__()
 
@@ -267,16 +186,7 @@ class Decoder(nn.Module):
         tgt_mask: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         """
-        Decoder的前向传播
-
-        Args:
-            tgt: 目标序列的token indices，shape: [batch, tgt_len]
-            encoder_output: Encoder的输出，shape: [batch, src_len, d_model]
-            src_mask: 源序列的mask，shape: [batch, 1, 1, src_len]
-            tgt_mask: 目标序列的mask，shape: [batch, 1, tgt_len, tgt_len]
-
-        Returns:
-            解码后的表示，shape: [batch, tgt_len, d_model]
+        Decoder的前向传播 
         """
         # 1. Token嵌入
         # [batch, tgt_len] -> [batch, tgt_len, d_model]
@@ -302,13 +212,6 @@ class Decoder(nn.Module):
     def make_tgt_mask(self, tgt: torch.Tensor, pad_idx: int = 0) -> torch.Tensor:
         """
         为目标序列创建mask（同时包含padding mask和future mask）
-
-        Args:
-            tgt: 目标序列的token indices，shape: [batch, tgt_len]
-            pad_idx: padding token的索引，默认0
-
-        Returns:
-            目标序列mask，shape: [batch, 1, tgt_len, tgt_len]
         """
         from src.utils import create_target_mask
         return create_target_mask(tgt, pad_idx)

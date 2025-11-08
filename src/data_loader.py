@@ -20,12 +20,6 @@ import os
 def load_samsum(split: str = 'train'):
     """
     加载SAMSum对话摘要数据集
-
-    Args:
-        split: 数据集分割，'train'、'validation'或'test'
-
-    Returns:
-        Dataset对象，每个样本格式 {'dialogue': str, 'summary': str}
     """
     dataset = load_dataset("knkarthick/samsum", split=split)
     return dataset
@@ -38,14 +32,6 @@ def train_bpe_tokenizer(
 ):
     """
     在SAMSum数据集上训练BPE分词器
-
-    Args:
-        dataset: SAMSum数据集
-        vocab_size: 词表大小
-        save_path: 保存路径
-
-    Returns:
-        训练好的Tokenizer对象
     """
     print(f"\n{'='*80}")
     print("训练BPE分词器")
@@ -89,7 +75,7 @@ def train_bpe_tokenizer(
 
     # 保存分词器
     tokenizer.save(save_path)
-    print(f"✅ 分词器已保存到: {save_path}")
+    print(f" 分词器已保存到: {save_path}")
     print(f"实际词表大小: {tokenizer.get_vocab_size()}")
 
     return tokenizer
@@ -98,12 +84,6 @@ def train_bpe_tokenizer(
 def load_tokenizer(tokenizer_path: str = "tokenizer.json"):
     """
     加载自训练的BPE分词器
-
-    Args:
-        tokenizer_path: 分词器文件路径
-
-    Returns:
-        Tokenizer对象
     """
     if not os.path.exists(tokenizer_path):
         raise FileNotFoundError(
@@ -112,7 +92,7 @@ def load_tokenizer(tokenizer_path: str = "tokenizer.json"):
         )
 
     tokenizer = Tokenizer.from_file(tokenizer_path)
-    print(f"✅ 加载分词器: {tokenizer_path}")
+    print(f" 加载分词器: {tokenizer_path}")
     print(f"词表大小: {tokenizer.get_vocab_size()}")
 
     return tokenizer
@@ -121,16 +101,6 @@ def load_tokenizer(tokenizer_path: str = "tokenizer.json"):
 class SummarizationDataset(Dataset):
     """
     对话摘要数据集
-
-    将原始数据集转换为PyTorch Dataset，每个样本包含：
-    - src: 对话token id序列
-    - tgt: 摘要token id序列
-
-    Args:
-        dataset: 原始数据集
-        tokenizer: BPE tokenizer
-        max_src_len: 源序列最大长度
-        max_tgt_len: 目标序列最大长度
     """
 
     def __init__(
@@ -156,12 +126,6 @@ class SummarizationDataset(Dataset):
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         获取单个样本
-
-        Args:
-            idx: 样本索引
-
-        Returns:
-            (src_ids, tgt_ids)，都是LongTensor
         """
         example = self.dataset[idx]
 
@@ -183,13 +147,6 @@ class SummarizationDataset(Dataset):
 def collate_fn(batch, pad_idx: int = 0):
     """
     批处理函数，将不同长度的序列padding到相同长度
-
-    Args:
-        batch: 批次数据，[(src1, tgt1), (src2, tgt2), ...]
-        pad_idx: padding token的索引
-
-    Returns:
-        (src_batch, tgt_batch)，都padding到批次内的最大长度
     """
     src_batch, tgt_batch = zip(*batch)
 
@@ -211,18 +168,6 @@ def create_dataloaders(
 ) -> DataLoader:
     """
     创建DataLoader
-
-    Args:
-        dataset: 原始数据集
-        tokenizer: BPE tokenizer
-        batch_size: 批次大小
-        max_src_len: 源序列最大长度
-        max_tgt_len: 目标序列最大长度
-        num_workers: 数据加载线程数
-        shuffle: 是否打乱数据
-
-    Returns:
-        DataLoader对象
     """
     summarization_dataset = SummarizationDataset(
         dataset,

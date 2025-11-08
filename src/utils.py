@@ -21,14 +21,6 @@ def visualize_positional_encoding(
     可视化位置编码矩阵
 
     生成位置编码的热力图，展示不同位置和维度的编码值。
-
-    Args:
-        d_model: 模型的嵌入维度
-        max_len: 要可视化的最大序列长度
-        save_path: 保存图片的路径
-
-    示例:
-        >>> visualize_positional_encoding(d_model=256, max_len=100)
     """
     # 确保保存目录存在
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -77,18 +69,6 @@ def visualize_attention(
     可视化注意力权重
 
     生成注意力权重的热力图，展示源序列和目标序列之间的注意力分布。
-
-    Args:
-        attention_weights: 注意力权重张量
-            shape: [batch, num_heads, seq_len_q, seq_len_k]
-        src_tokens: 源序列的token列表，可选
-        tgt_tokens: 目标序列的token列表，可选
-        save_path: 保存图片的路径
-        head_idx: 要可视化的注意力头索引
-
-    示例:
-        >>> attn = torch.randn(1, 8, 10, 10)
-        >>> visualize_attention(attn, head_idx=0)
     """
     # 确保保存目录存在
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -148,20 +128,6 @@ def visualize_attention(
 def create_padding_mask(seq: torch.Tensor, pad_idx: int = 0) -> torch.Tensor:
     """
     创建padding mask
-
-    Args:
-        seq: 输入序列，shape: [batch, seq_len]
-        pad_idx: padding token的索引，默认0
-
-    Returns:
-        padding mask，shape: [batch, 1, 1, seq_len]
-        1表示有效位置，0表示padding位置
-
-    示例:
-        >>> seq = torch.tensor([[1, 2, 3, 0, 0], [4, 5, 0, 0, 0]])
-        >>> mask = create_padding_mask(seq, pad_idx=0)
-        >>> mask.shape
-        torch.Size([2, 1, 1, 5])
     """
     # seq != pad_idx 会产生 [batch, seq_len] 的布尔张量
     # unsqueeze两次得到 [batch, 1, 1, seq_len]
@@ -171,21 +137,6 @@ def create_padding_mask(seq: torch.Tensor, pad_idx: int = 0) -> torch.Tensor:
 def create_future_mask(size: int) -> torch.Tensor:
     """
     创建future mask（下三角矩阵，用于防止看到未来信息）
-
-    Args:
-        size: 序列长度
-
-    Returns:
-        future mask，shape: [1, 1, size, size]
-        下三角（包括对角线）为1，上三角为0
-
-    示例:
-        >>> mask = create_future_mask(4)
-        >>> mask.squeeze()
-        tensor([[1, 0, 0, 0],
-                [1, 1, 0, 0],
-                [1, 1, 1, 0],
-                [1, 1, 1, 1]])
     """
     # torch.triu创建上三角矩阵，diagonal=1表示对角线上方
     # 我们需要下三角，所以取反
@@ -202,23 +153,6 @@ def create_target_mask(tgt: torch.Tensor, pad_idx: int = 0) -> torch.Tensor:
     在Decoder中，目标序列需要两种mask：
     1. Padding mask：屏蔽padding位置
     2. Future mask：防止看到未来的token
-
-    Args:
-        tgt: 目标序列，shape: [batch, tgt_len]
-        pad_idx: padding token的索引，默认0
-
-    Returns:
-        组合mask，shape: [batch, 1, tgt_len, tgt_len]
-        只有非padding且非future的位置为1
-
-    示例:
-        >>> tgt = torch.tensor([[1, 2, 3, 0], [4, 5, 0, 0]])
-        >>> mask = create_target_mask(tgt, pad_idx=0)
-        >>> mask[0, 0]  # 第一个样本的mask
-        tensor([[1, 0, 0, 0],
-                [1, 1, 0, 0],
-                [1, 1, 1, 0],
-                [0, 0, 0, 0]])  # 最后一行全0因为是padding
     """
     tgt_len = tgt.size(1)
 
@@ -244,17 +178,6 @@ def create_target_mask(tgt: torch.Tensor, pad_idx: int = 0) -> torch.Tensor:
 def count_parameters(model: torch.nn.Module) -> int:
     """
     统计模型的可训练参数数量
-
-    Args:
-        model: PyTorch模型
-
-    Returns:
-        可训练参数的总数
-
-    示例:
-        >>> model = nn.Linear(100, 50)
-        >>> count_parameters(model)
-        5050
     """
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
@@ -262,18 +185,6 @@ def count_parameters(model: torch.nn.Module) -> int:
 def print_model_info(model: torch.nn.Module) -> None:
     """
     打印模型的详细信息
-
-    包括：
-    - 总参数数量
-    - 各层的参数数量
-    - 模型结构
-
-    Args:
-        model: PyTorch模型
-
-    示例:
-        >>> model = Transformer(...)
-        >>> print_model_info(model)
     """
     total_params = count_parameters(model)
     print("=" * 80)
@@ -309,16 +220,6 @@ def plot_training_curves(
 ) -> None:
     """
     绘制训练曲线
-
-    Args:
-        train_losses: 训练集loss列表
-        val_losses: 验证集loss列表
-        save_path: 保存图片的路径
-
-    示例:
-        >>> train_losses = [2.5, 2.3, 2.1, 1.9]
-        >>> val_losses = [2.6, 2.4, 2.2, 2.0]
-        >>> plot_training_curves(train_losses, val_losses)
     """
     # 确保保存目录存在
     os.makedirs(os.path.dirname(save_path), exist_ok=True)

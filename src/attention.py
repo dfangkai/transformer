@@ -19,49 +19,21 @@ def scaled_dot_product_attention(
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     计算缩放点积注意力
-
-    实现公式: Attention(Q,K,V) = softmax(QK^T / sqrt(d_k)) V
-
-    参数:
-        Q: Query张量，shape: [batch, num_heads, seq_len_q, d_k]
-        K: Key张量，shape: [batch, num_heads, seq_len_k, d_k]
-        V: Value张量，shape: [batch, num_heads, seq_len_v, d_v]
-        mask: 可选的掩码张量
-            - shape: [batch, 1, seq_len_q, seq_len_k] 或 [batch, 1, 1, seq_len_k]
-            - mask中为0的位置会被设置为-inf（在softmax前）
-
-    返回:
-        output: 注意力输出，shape: [batch, num_heads, seq_len_q, d_v]
-        attention_weights: 注意力权重，shape: [batch, num_heads, seq_len_q, seq_len_k]
-
-    示例:
-        >>> Q = torch.randn(32, 8, 10, 64)  # batch=32, heads=8, seq_len=10, d_k=64
-        >>> K = torch.randn(32, 8, 10, 64)
-        >>> V = torch.randn(32, 8, 10, 64)
-        >>> output, attn_weights = scaled_dot_product_attention(Q, K, V)
-        >>> output.shape
-        torch.Size([32, 8, 10, 64])
     """
     # 获取d_k维度（Q的最后一个维度）
     d_k = Q.size(-1)
 
     # 计算注意力分数: QK^T / sqrt(d_k)
-    # Q @ K^T: [batch, num_heads, seq_len_q, d_k] @ [batch, num_heads, d_k, seq_len_k]
-    #        = [batch, num_heads, seq_len_q, seq_len_k]
     scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)
 
     # 应用mask（如果提供）
     if mask is not None:
-        # 将mask中为0的位置设置为-1e9（接近负无穷）
-        # 这样在softmax后这些位置的权重会接近0
         scores = scores.masked_fill(mask == 0, -1e9)
 
     # 计算注意力权重（沿着最后一个维度进行softmax）
     attention_weights = F.softmax(scores, dim=-1)
 
     # 计算输出: attention_weights @ V
-    # [batch, num_heads, seq_len_q, seq_len_k] @ [batch, num_heads, seq_len_v, d_v]
-    # = [batch, num_heads, seq_len_q, d_v]
     output = torch.matmul(attention_weights, V)
 
     return output, attention_weights
@@ -70,39 +42,11 @@ def scaled_dot_product_attention(
 class MultiHeadAttention(nn.Module):
     """
     多头注意力机制
-
-    将注意力机制并行化为多个"头"，每个头学习不同的表示子空间。
-
-    参数:
-        d_model (int): 模型的嵌入维度
-        num_heads (int): 注意力头的数量
-        dropout (float): dropout概率，默认0.1
-
-    属性:
-        d_k (int): 每个头的key/query维度，等于d_model // num_heads
-        num_heads (int): 注意力头数量
-        W_Q (nn.Linear): Query的线性变换
-        W_K (nn.Linear): Key的线性变换
-        W_V (nn.Linear): Value的线性变换
-        W_O (nn.Linear): 输出的线性变换
-        dropout (nn.Dropout): Dropout层
-
-    示例:
-        >>> mha = MultiHeadAttention(d_model=256, num_heads=8)
-        >>> Q = torch.randn(32, 10, 256)  # batch=32, seq_len=10, d_model=256
-        >>> output, attn = mha(Q, Q, Q)
-        >>> output.shape
-        torch.Size([32, 10, 256])
     """
 
     def __init__(self, d_model: int, num_heads: int, dropout: float = 0.1):
         """
         初始化多头注意力层
-
-        Args:
-            d_model: 模型的嵌入维度
-            num_heads: 注意力头的数量
-            dropout: dropout概率
         """
         super(MultiHeadAttention, self).__init__()
 
@@ -127,12 +71,6 @@ class MultiHeadAttention(nn.Module):
     def split_heads(self, x: torch.Tensor) -> torch.Tensor:
         """
         将输入分割成多个头
-
-        Args:
-            x: 输入张量，shape: [batch, seq_len, d_model]
-
-        Returns:
-            分割后的张量，shape: [batch, num_heads, seq_len, d_k]
         """
         batch_size, seq_len, d_model = x.size()
 
@@ -145,12 +83,6 @@ class MultiHeadAttention(nn.Module):
     def combine_heads(self, x: torch.Tensor) -> torch.Tensor:
         """
         将多个头合并回原始维度
-
-        Args:
-            x: 输入张量，shape: [batch, num_heads, seq_len, d_k]
-
-        Returns:
-            合并后的张量，shape: [batch, seq_len, d_model]
         """
         batch_size, num_heads, seq_len, d_k = x.size()
 
@@ -169,16 +101,6 @@ class MultiHeadAttention(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         多头注意力的前向传播
-
-        Args:
-            Q: Query张量，shape: [batch, seq_len_q, d_model]
-            K: Key张量，shape: [batch, seq_len_k, d_model]
-            V: Value张量，shape: [batch, seq_len_v, d_model]
-            mask: 可选的掩码张量
-
-        Returns:
-            output: 输出张量，shape: [batch, seq_len_q, d_model]
-            attention_weights: 注意力权重，shape: [batch, num_heads, seq_len_q, seq_len_k]
         """
         batch_size = Q.size(0)
 

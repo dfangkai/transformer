@@ -44,14 +44,6 @@ def get_cosine_schedule_with_warmup(
 ):
     """
     Warmup + Cosine学习率调度
-
-    Args:
-        optimizer: 优化器
-        num_warmup_steps: warmup步数
-        num_training_steps: 总训练步数
-
-    Returns:
-        学习率调度器
     """
     def lr_lambda(current_step):
         if current_step < num_warmup_steps:
@@ -71,12 +63,7 @@ class EarlyStopping:
     当验证loss在patience个epoch内没有改善时停止训练
     """
     def __init__(self, patience: int = 5, min_delta: float = 0.0, verbose: bool = True):
-        """
-        Args:
-            patience: 容忍多少个epoch没有改善
-            min_delta: 最小改善幅度
-            verbose: 是否打印信息
-        """
+
         self.patience = patience
         self.min_delta = min_delta
         self.verbose = verbose
@@ -87,12 +74,6 @@ class EarlyStopping:
     def __call__(self, val_loss: float) -> bool:
         """
         检查是否应该早停
-
-        Args:
-            val_loss: 当前验证loss
-
-        Returns:
-            是否应该停止训练
         """
         if self.best_loss is None:
             self.best_loss = val_loss
@@ -127,19 +108,6 @@ def train_epoch(
 ) -> float:
     """
     训练一个epoch（支持梯度累积）
-
-    Args:
-        model: Transformer模型
-        dataloader: 训练数据加载器
-        optimizer: 优化器
-        criterion: 损失函数
-        device: 设备
-        epoch: 当前epoch数
-        log_interval: 日志打印间隔
-        gradient_accumulation_steps: 梯度累积步数
-
-    Returns:
-        平均训练loss
     """
     model.train()
     total_loss = 0
@@ -202,15 +170,6 @@ def evaluate(
 ) -> float:
     """
     评估模型
-
-    Args:
-        model: Transformer模型
-        dataloader: 验证数据加载器
-        criterion: 损失函数
-        device: 设备
-
-    Returns:
-        平均验证loss
     """
     model.eval()
     total_loss = 0
@@ -243,17 +202,6 @@ def summarize_dialogue(
 ) -> str:
     """
     生成对话摘要
-
-    Args:
-        model: Transformer模型
-        dialogue: 对话文本
-        tokenizer: BPE tokenizer
-        device: 设备
-        max_len: 最大生成长度
-        debug: 是否打印调试信息
-
-    Returns:
-        生成的摘要
     """
     model.eval()
 

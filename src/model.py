@@ -18,42 +18,6 @@ class Transformer(nn.Module):
 
     这是"Attention Is All You Need"论文中描述的经典Transformer模型。
     包含Encoder、Decoder和最终的投影层。
-
-    参数:
-        src_vocab_size (int): 源语言词汇表大小
-        tgt_vocab_size (int): 目标语言词汇表大小
-        d_model (int): 模型的嵌入维度，默认512
-        num_heads (int): 注意力头的数量，默认8
-        num_encoder_layers (int): Encoder层的数量，默认6
-        num_decoder_layers (int): Decoder层的数量，默认6
-        d_ff (int): 前馈网络的隐藏层维度，默认2048
-        max_len (int): 最大序列长度，默认5000
-        dropout (float): dropout概率，默认0.1
-        pad_idx (int): padding token的索引，默认0
-
-    属性:
-        encoder (Encoder): Transformer编码器
-        decoder (Decoder): Transformer解码器
-        projection (nn.Linear): 将decoder输出投影到目标词汇表的线性层
-        pad_idx (int): padding token索引
-        d_model (int): 模型维度
-        src_vocab_size (int): 源词汇表大小
-        tgt_vocab_size (int): 目标词汇表大小
-
-    示例:
-        >>> model = Transformer(
-        ...     src_vocab_size=10000,
-        ...     tgt_vocab_size=10000,
-        ...     d_model=512,
-        ...     num_heads=8,
-        ...     num_encoder_layers=6,
-        ...     num_decoder_layers=6
-        ... )
-        >>> src = torch.randint(0, 10000, (32, 20))  # [batch, src_len]
-        >>> tgt = torch.randint(0, 10000, (32, 15))  # [batch, tgt_len]
-        >>> output = model(src, tgt)
-        >>> output.shape
-        torch.Size([32, 15, 10000])
     """
 
     def __init__(
@@ -72,24 +36,7 @@ class Transformer(nn.Module):
         use_residual: bool = True,
         use_layernorm: bool = True
     ):
-        """
-        初始化Transformer模型
-
-        Args:
-            src_vocab_size: 源语言词汇表大小
-            tgt_vocab_size: 目标语言词汇表大小
-            d_model: 模型的嵌入维度
-            num_heads: 注意力头的数量
-            num_encoder_layers: Encoder层的数量
-            num_decoder_layers: Decoder层的数量
-            d_ff: 前馈网络的隐藏层维度
-            max_len: 最大序列长度
-            dropout: dropout概率
-            pad_idx: padding token的索引
-            use_positional_encoding: 是否使用位置编码
-            use_residual: 是否使用残差连接
-            use_layernorm: 是否使用LayerNorm
-        """
+       
         super(Transformer, self).__init__()
 
         self.d_model = d_model
@@ -145,20 +92,7 @@ class Transformer(nn.Module):
         src_mask: Optional[torch.Tensor] = None,
         tgt_mask: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        """
-        Transformer的前向传播
-
-        Args:
-            src: 源序列的token indices，shape: [batch, src_len]
-            tgt: 目标序列的token indices，shape: [batch, tgt_len]
-            src_mask: 源序列的mask，shape: [batch, 1, 1, src_len]
-                     如果为None，会自动根据pad_idx创建
-            tgt_mask: 目标序列的mask，shape: [batch, 1, tgt_len, tgt_len]
-                     如果为None，会自动根据pad_idx创建
-
-        Returns:
-            模型输出的logits，shape: [batch, tgt_len, tgt_vocab_size]
-        """
+    
         # 自动创建masks（如果没有提供）
         if src_mask is None:
             src_mask = self.make_src_mask(src)
@@ -184,13 +118,6 @@ class Transformer(nn.Module):
     ) -> torch.Tensor:
         """
         仅运行Encoder
-
-        Args:
-            src: 源序列的token indices，shape: [batch, src_len]
-            src_mask: 源序列的mask，shape: [batch, 1, 1, src_len]
-
-        Returns:
-            Encoder输出，shape: [batch, src_len, d_model]
         """
         if src_mask is None:
             src_mask = self.make_src_mask(src)
@@ -206,15 +133,6 @@ class Transformer(nn.Module):
     ) -> torch.Tensor:
         """
         仅运行Decoder
-
-        Args:
-            tgt: 目标序列的token indices，shape: [batch, tgt_len]
-            encoder_output: Encoder的输出，shape: [batch, src_len, d_model]
-            src_mask: 源序列的mask，shape: [batch, 1, 1, src_len]
-            tgt_mask: 目标序列的mask，shape: [batch, 1, tgt_len, tgt_len]
-
-        Returns:
-            Decoder输出的logits，shape: [batch, tgt_len, tgt_vocab_size]
         """
         if tgt_mask is None:
             tgt_mask = self.make_tgt_mask(tgt)
@@ -225,24 +143,12 @@ class Transformer(nn.Module):
     def make_src_mask(self, src: torch.Tensor) -> torch.Tensor:
         """
         为源序列创建padding mask
-
-        Args:
-            src: 源序列的token indices，shape: [batch, src_len]
-
-        Returns:
-            源序列mask，shape: [batch, 1, 1, src_len]
         """
         return self.encoder.make_src_mask(src, self.pad_idx)
 
     def make_tgt_mask(self, tgt: torch.Tensor) -> torch.Tensor:
         """
         为目标序列创建mask（padding + future）
-
-        Args:
-            tgt: 目标序列的token indices，shape: [batch, tgt_len]
-
-        Returns:
-            目标序列mask，shape: [batch, 1, tgt_len, tgt_len]
         """
         return self.decoder.make_tgt_mask(tgt, self.pad_idx)
 
@@ -259,26 +165,6 @@ class Transformer(nn.Module):
         贪婪解码生成目标序列
 
         使用贪婪搜索策略，每一步选择概率最高的token。
-
-        Args:
-            src: 源序列的token indices，shape: [batch, src_len]
-            max_len: 生成序列的最大长度，默认50
-            start_symbol: 开始符号的token ID，默认1
-            end_symbol: 结束符号的token ID，默认2
-            temperature: 温度参数，用于调节softmax分布，默认1.0
-                        temperature > 1.0 使分布更平滑
-                        temperature < 1.0 使分布更尖锐
-
-        Returns:
-            生成的目标序列，shape: [batch, gen_len]
-            gen_len <= max_len（如果遇到end_symbol会提前结束）
-
-        示例:
-            >>> model = Transformer(...)
-            >>> src = torch.randint(0, 10000, (1, 20))
-            >>> output = model.generate(src, max_len=30)
-            >>> output.shape
-            torch.Size([1, 30])
         """
         self.eval()
 
@@ -338,22 +224,6 @@ class Transformer(nn.Module):
         Beam Search解码
 
         使用beam search策略生成更高质量的输出序列。
-
-        Args:
-            src: 源序列的token indices，shape: [1, src_len]（仅支持batch_size=1）
-            beam_size: beam的大小，默认5
-            max_len: 生成序列的最大长度，默认50
-            start_symbol: 开始符号的token ID，默认1
-            end_symbol: 结束符号的token ID，默认2
-            length_penalty: 长度惩罚参数，默认1.0
-                          > 1.0 偏好更长的序列
-                          < 1.0 偏好更短的序列
-
-        Returns:
-            生成的最佳目标序列，shape: [1, gen_len]
-
-        注意:
-            当前实现仅支持batch_size=1
         """
         self.eval()
 
